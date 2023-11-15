@@ -1,4 +1,4 @@
-#include "s21_test.h"
+#include "s21_grep.h"
 
 int main(int argc, char **argv) {
   s21_grep_programm(argc, argv);
@@ -18,7 +18,7 @@ void s21_grep_programm(int argc, char **argv) {
 }
 
 int scanOptions(int argc, char **argv, options *config, char **template) {
-  for (int sym = 0; (sym = getopt(argc, argv, "e:ivclnhsf:o")) != (-1);) {
+  for (int sym = 0; (sym = getopt_long(argc, argv, "e:ivclnhsf:o", 0, 0)) != -1;) {
     switch (sym) {
       case 'i':
         config->i = 1;
