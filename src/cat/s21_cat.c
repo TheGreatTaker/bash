@@ -25,34 +25,34 @@ void read_flags(flags *info, int argc, char *argv[]) {
   while ((true_flags = getopt_long(argc, argv, "+bevEnstT", longFlags, NULL)) !=
          -1) {
     switch (true_flags) {
-      case 'b':
-        info->b = true;
-        break;
-      case 'e':
-        info->e = true;
-        info->v = true;
-        break;
-      case 'E':
-        info->e = true;
-        break;
-      case 'n':
-        info->n = true;
-        break;
-      case 's':
-        info->s = true;
-        break;
-      case 't':
-        info->t = true;
-        info->v = true;
-        break;
-      case 'T':
-        info->t = true;
-        break;
-      case 'v':
-        info->v = true;
-        break;
-      default:
-        info->err = true;
+    case 'b':
+      info->b = true;
+      break;
+    case 'e':
+      info->e = true;
+      info->v = true;
+      break;
+    case 'E':
+      info->e = true;
+      break;
+    case 'n':
+      info->n = true;
+      break;
+    case 's':
+      info->s = true;
+      break;
+    case 't':
+      info->t = true;
+      info->v = true;
+      break;
+    case 'T':
+      info->t = true;
+      break;
+    case 'v':
+      info->v = true;
+      break;
+    default:
+      info->err = true;
     }
   }
 }
@@ -83,7 +83,8 @@ void print_symb(int c, int *prev, flags *info, int *index,
     c = c + 64;
   }
   if (info->v && c == 127) {
-    if ((c = '?')) printf("^");
+    if ((c = '?'))
+      printf("^");
   }
   fputc(c, stdout);
   // Обновляем предыдущий символ
