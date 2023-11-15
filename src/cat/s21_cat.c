@@ -57,11 +57,12 @@ void read_flags(flags *info, int argc, char *argv[]) {
   }
 }
 
-void print_symb(int c, int *prev, flags *info, int *index,
-                bool *eline_printed) {
+void print_symb(int c, int *prev, flags *info, int *index, bool *eline_printed) {
+  bool ret = false;
   if (info->s && *prev == '\n' && c == '\n' && *eline_printed) {
-    return;
+    ret = true;
   }
+  if (!ret){
   if (*prev == '\n' && c == '\n') {
     *eline_printed = true;
   } else {
@@ -83,12 +84,12 @@ void print_symb(int c, int *prev, flags *info, int *index,
     c = c + 64;
   }
   if (info->v && c == 127) {
-    if ((c = '?'))
-      printf("^");
+    if ((c = '?')) printf("^");
   }
   fputc(c, stdout);
   // Обновляем предыдущий символ
   *prev = c;
+  }
 }
 
 int reader(char *name, flags info) {
