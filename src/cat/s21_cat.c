@@ -1,66 +1,19 @@
-#include <getopt.h>
-#include <stdbool.h>
-#include <stdio.h>
-typedef struct flags {
-  bool b;
-  bool e;
-  bool n;
-  bool s;
-  bool t;
-  bool v;
-  bool err;
-} flags;
+#include "s21_cat.h"
 
-void print_symb(int c, int *prev, flags *info, int *index, bool *eline_printed);
-
-int reader(char *name, flags info) {
-  int err_code = 0;
-  FILE *f = fopen(name, "rt");
-  if (f != NULL) {
-    int index = 0;
-    bool eline_printed = false;
-    int c = fgetc(f), prev = '\n';
-    while (c != EOF) {
-      print_symb(c, &prev, &info, &index, &eline_printed);
-      c = fgetc(f);
+int main(int argc, char *argv[]) {
+  flags info = {0};
+  read_flags(&info, argc, argv);
+  // Обрабатываем каждый файл, переданный в аргументах командной строки
+  if (!info.err) {
+    for (int i = 1; i < argc; i++) {
+      if ((!reader(argv[i], info) && i == argc)) {
+        fprintf(stderr, "s21_cat: %s: No such file or directory\n", argv[i]);
+      }
     }
-    fclose(f);
-  } else {
-    err_code = 1;
-  }
-  return err_code;
-}
-void print_symb(int c, int *prev, flags *info, int *index,
-                bool *eline_printed) {
-  if (info->s && *prev == '\n' && c == '\n' && *eline_printed) {
-    return;
-  }
-  if (*prev == '\n' && c == '\n') {
-    *eline_printed = true;
-  } else {
-    *eline_printed = false;
-  }
-  if (((info->n && !info->b) || (info->b && c != '\n')) && *prev == '\n') {
-    *index += 1;
-    printf("%6d\t", *index);
-  }
-  if (info->e && c == '\n') {
-    printf("$");
-  }
-  if (info->t && c == '\t') {
-    printf("^");
-    c = '\t' + 64;
-  }
-  if (info->v && c >= 0 && c <= 31 && c != '\n' && c != '\t') {
-    printf("^");
-    c = c + 64;
-  }
-  if (info->v && c == 127) {
-    if ((c = '?')) printf("^");
-  }
-  fputc(c, stdout);
-  // Обновляем предыдущий символ
-  *prev = c;
+  } else
+    fprintf(stderr, "usage: s21_cat [-benstv] [file ...]\n");
+
+  return 0;
 }
 
 void read_flags(flags *info, int argc, char *argv[]) {
@@ -104,18 +57,53 @@ void read_flags(flags *info, int argc, char *argv[]) {
   }
 }
 
-int main(int argc, char *argv[]) {
-  flags info = {0};
-  read_flags(&info, argc, argv);
-  // Обрабатываем каждый файл, переданный в аргументах командной строки
-  if (!info.err) {
-    for (int i = 1; i < argc; i++) {
-      if ((!reader(argv[i], info) && i == argc)) {
-        fprintf(stderr, "s21_cat: %s: No such file or directory\n", argv[i]);
-      }
-    }
-  } else
-    fprintf(stderr, "usage: s21_cat [-benstv] [file ...]\n");
+void print_symb(int c, int *prev, flags *info, int *index,
+                bool *eline_printed) {
+  if (info->s && *prev == '\n' && c == '\n' && *eline_printed) {
+    return;
+  }
+  if (*prev == '\n' && c == '\n') {
+    *eline_printed = true;
+  } else {
+    *eline_printed = false;
+  }
+  if (((info->n && !info->b) || (info->b && c != '\n')) && *prev == '\n') {
+    *index += 1;
+    printf("%6d\t", *index);
+  }
+  if (info->e && c == '\n') {
+    printf("$");
+  }
+  if (info->t && c == '\t') {
+    printf("^");
+    c = '\t' + 64;
+  }
+  if (info->v && c >= 0 && c <= 31 && c != '\n' && c != '\t') {
+    printf("^");
+    c = c + 64;
+  }
+  if (info->v && c == 127) {
+    if ((c = '?')) printf("^");
+  }
+  fputc(c, stdout);
+  // Обновляем предыдущий символ
+  *prev = c;
+}
 
-  return 0;
+int reader(char *name, flags info) {
+  int err_code = 0;
+  FILE *f = fopen(name, "rt");
+  if (f != NULL) {
+    int index = 0;
+    bool eline_printed = false;
+    int c = fgetc(f), prev = '\n';
+    while (c != EOF) {
+      print_symb(c, &prev, &info, &index, &eline_printed);
+      c = fgetc(f);
+    }
+    fclose(f);
+  } else {
+    err_code = 1;
+  }
+  return err_code;
 }
